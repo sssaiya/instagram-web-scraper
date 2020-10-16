@@ -8,16 +8,9 @@ const loginURL = "https://www.instagram.com/accounts/login/";
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
   await logIn(page);
-  // await page
-  //   .waitForFunction(
-  //     'document.querySelectorAll("button")[1].inner‌​Text.includes("Not Now")'
-  //   )
-  //   .catch((err) => console.log(err));
-  console.log("Logged in");
-  // page.waitForNavigation({ waitUntil: 'networkidle0' }),
   await page.screenshot({ path: "img/afterLOGIN.png" });
-  // await page.goto(profileUrlToScrape);
-  // await page.screenshot({ path: "img/example.png" });
+  // await page.goto(loginURL);
+  // await page.screenshot({ path: "img/goToProfile.png" });
   await browser.close();
 })();
 
@@ -30,6 +23,16 @@ async function logIn(page) {
   // Submit log in credentials and wait for navigation
   await Promise.all([
     page.click('[type="submit"]'),
+    page.waitForNavigation({
+      waitUntil: "networkidle0",
+    }),
+  ]);
+  console.log("Logged in");
+  //Click Not Now to not remember credentials
+  await await Promise.all([
+    page.evaluate(() => {
+      document.querySelectorAll("button")[1].click();
+    }),
     page.waitForNavigation({
       waitUntil: "networkidle0",
     }),
