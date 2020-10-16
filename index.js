@@ -7,16 +7,17 @@ const loginURL = "https://www.instagram.com/accounts/login/";
   console.log("Launching pupeteer");
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
-  await logIn(page);
+  await logIn(page); // Log in with cred
   await page.screenshot({ path: "img/afterLOGIN.png" });
-  // await page.goto(loginURL);
-  // await page.screenshot({ path: "img/goToProfile.png" });
+  // Navigate to profile you want to scrape
+  await goTo(profileUrlToScrape, page); 
+  await page.screenshot({ path: "img/afterNAV.png" });
   await browser.close();
 })();
 
 async function logIn(page) {
   console.log(`Logging in as ${creds.USERNAME}`);
-  await page.goto(loginURL);
+  await goTo(loginURL, page);
   await page.waitForSelector('input[name="username"]');
   await page.type('input[name="username"]', creds.USERNAME);
   await page.type('input[name="password"]', creds.PASSWORD);
@@ -29,10 +30,19 @@ async function logIn(page) {
   ]);
   console.log("Logged in");
   //Click Not Now to not remember credentials
-  await await Promise.all([
+  await Promise.all([
     page.evaluate(() => {
       document.querySelectorAll("button")[1].click();
     }),
+    page.waitForNavigation({
+      waitUntil: "networkidle0",
+    }),
+  ]);
+}
+
+async function goTo(url, page) {
+  await Promise.all([
+    page.goto(url),
     page.waitForNavigation({
       waitUntil: "networkidle0",
     }),
